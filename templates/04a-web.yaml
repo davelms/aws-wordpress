@@ -493,20 +493,21 @@ Resources:
               amazon-linux-extras: []
           commands:
             enable_php74_repo:
-              command: amazon-linux-extras enable php7.4
-              cwd: /tmp
+              command: ./amazon-linux-extras enable php7.4
+              cwd: /bin
               ignoreErrors: false
         install_webserver:
           packages:
             yum:
               httpd: []
+              mariadb: []
               php: []
               php-cli: []
               php-common: []
               php-gd: []
               php-intl: []
               php-json: []
-              php-mbstring: []
+              php-mbstring: []        
               php-mysqlnd: []
               php-pdo: []
               php-pear: []
@@ -541,7 +542,8 @@ Resources:
         build_cacheclient:
           packages:
             yum:
-              gcc-c++: []  
+              gcc-c++: []
+              php-pecl-memcache: []
           files:
             /tmp/install_cacheclient.sh:
               content:
@@ -553,7 +555,6 @@ Resources:
                       touch /etc/php.d/50-memcached.ini
                   fi
                   sed -i '3i extension=/usr/lib64/php/modules/amazon-elasticache-cluster-client.so;' /etc/php.d/50-memcached.ini
-                  sed -i '3i extension=igbinary.so;' /etc/php.d/50-memcached.ini
               mode: 000500
               owner: root
               group: root
@@ -569,6 +570,7 @@ Resources:
                   # create hidden opcache directory locally & change owner to apache
                   if [ ! -d /var/www/.opcache ]; then                    
                       mkdir -p /var/www/.opcache
+                      chown -R apache:apache /var/www/.opcache
                   fi
                   # enable opcache in /etc/php.d/10-opcache.ini
                   sed -i 's/;opcache.file_cache=.*/opcache.file_cache=\/var\/www\/.opcache/' /etc/php.d/10-opcache.ini
